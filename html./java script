@@ -1,0 +1,195 @@
+document.addEventListener('DOMContentLoaded', function() {
+  // Elementos DOM
+  const passwordEl = document.getElementById('password');
+  const copyBtn = document.getElementById('copy-btn');
+  const generateBtn = document.getElementById('generate');
+  const lengthSlider = document.getElementById('length');
+  const lengthValue = document.getElementById('length-value');
+  const uppercaseEl = document.getElementById('uppercase');
+  const lowercaseEl = document.getElementById('lowercase');
+  const numbersEl = document.getElementById('numbers');
+  const symbolsEl = document.getElementById('symbols');
+  const excludeSimilarEl = document.getElementById('exclude-similar');
+  const strengthMeter = document.getElementById('strength-meter');
+  const strengthText = document.getElementById('strength-text');
+
+  // Conjuntos de caracteres
+  const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const uppercaseAll = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lowercase = 'abcdefghijkmnpqrstuvwxyz';
+  const lowercaseAll = 'abcdefghijklmnopqrstuvwxyz';
+  const numbers = '23456789';
+  const numbersAll = '0123456789';
+  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+  // Atualizar valor do slider
+  lengthSlider.addEventListener('input', function() {
+    lengthValue.textContent = this.value;
+  });
+
+  // Gerar senha
+  generateBtn.addEventListener('click', function() {
+    const length = +lengthSlider.value;
+    const hasUppercase = uppercaseEl.checked;
+    const hasLowercase = lowercaseEl.checked;
+    const hasNumbers = numbersEl.checked;
+    const hasSymbols = symbolsEl.checked;
+    const excludeSimilar = excludeSimilarEl.checked;
+
+    passwordEl.value = generatePassword(
+      length, 
+      hasUppercase, 
+      hasLowercase, 
+      hasNumbers, 
+      hasSymbols,
+      excludeSimilar
+    );
+
+    // Atualizar medidor de força
+    updateStrengthMeter(passwordEl.value);
+  });
+
+  // Copiar senha
+  copyBtn.addEventListener('click', function() {
+    if (!passwordEl.value) return;
+    
+    passwordEl.select();
+    document.execCommand('copy');
+    
+    // Feedback visual
+    const originalText = copyBtn.textContent;
+    copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/></svg> Copiado!';
+    
+    setTimeout(() => {
+      copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg> Copiar';
+    }, 2000);
+  });
+
+  // Gerar senha aleatória
+  function generatePassword(length, hasUppercase, hasLowercase, hasNumbers, hasSymbols, excludeSimilar) {
+    let chars = '';
+    let password = '';
+    
+    // Construir conjunto de caracteres baseado nas seleções
+    if (hasUppercase) {
+      chars += excludeSimilar ? uppercase : uppercaseAll;
+    }
+    if (hasLowercase) {
+      chars += excludeSimilar ? lowercase : lowercaseAll;
+    }
+    if (hasNumbers) {
+      chars += excludeSimilar ? numbers : numbersAll;
+    }
+    if (hasSymbols) {
+      chars += symbols;
+    }
+    
+    // Verificar se pelo menos um conjunto foi selecionado
+    if (chars.length === 0) {
+      alert('Selecione pelo menos um tipo de caractere!');
+      return '';
+    }
+    
+    // Garantir que pelo menos um caractere de cada tipo selecionado seja incluído
+    const requiredChars = [];
+    if (hasUppercase) {
+      const randomChar = excludeSimilar 
+        ? uppercase[Math.floor(Math.random() * uppercase.length)]
+        : uppercaseAll[Math.floor(Math.random() * uppercaseAll.length)];
+      requiredChars.push(randomChar);
+    }
+    if (hasLowercase) {
+      const randomChar = excludeSimilar 
+        ? lowercase[Math.floor(Math.random() * lowercase.length)]
+        : lowercaseAll[Math.floor(Math.random() * lowercaseAll.length)];
+      requiredChars.push(randomChar);
+    }
+    if (hasNumbers) {
+      const randomChar = excludeSimilar 
+        ? numbers[Math.floor(Math.random() * numbers.length)]
+        : numbersAll[Math.floor(Math.random() * numbersAll.length)];
+      requiredChars.push(randomChar);
+    }
+    if (hasSymbols) {
+      const randomChar = symbols[Math.floor(Math.random() * symbols.length)];
+      requiredChars.push(randomChar);
+    }
+    
+    // Gerar o resto da senha
+    for (let i = 0; i < length - requiredChars.length; i++) {
+      const randomIndex = Math.floor(Math.random() * chars.length);
+      password += chars[randomIndex];
+    }
+    
+    // Adicionar os caracteres obrigatórios e embaralhar
+    password += requiredChars.join('');
+    return shuffleString(password);
+  }
+
+  // Embaralhar string
+  function shuffleString(string) {
+    const array = string.split('');
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array.join('');
+  }
+
+  // Atualizar medidor de força da senha
+  function updateStrengthMeter(password) {
+    if (!password) {
+      strengthMeter.style.width = '0%';
+      strengthText.textContent = 'Força da senha: ';
+      strengthText.style.color = 'inherit';
+      return;
+    }
+
+    // Calcular pontuação de força (0-100)
+    let score = 0;
+    
+    // Pontuação por comprimento (máximo 40 pontos)
+    score += Math.min(password.length * 3, 40);
+    
+    // Pontuação por tipos de caracteres (máximo 30 pontos)
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumbers = /[0-9]/.test(password);
+    const hasSymbols = /[^A-Za-z0-9]/.test(password);
+    
+    const typesCount = [hasUppercase, hasLowercase, hasNumbers, hasSymbols].filter(Boolean).length;
+    score += (typesCount - 1) * 10;
+    
+    // Pontuação por variedade (máximo 30 pontos)
+    const uniqueChars = new Set(password).size;
+    score += Math.min((uniqueChars / password.length) * 30, 30);
+    
+    // Normalizar pontuação (0-100)
+    score = Math.min(Math.max(score, 0), 100);
+    
+    // Atualizar barra e texto
+    strengthMeter.style.width = `${score}%`;
+    
+    // Determinar nível de força
+    let strength;
+    let color;
+    
+    if (score <= 40) {
+      strength = 'Fraca';
+      color = 'var(--danger-color)';
+    } else if (score <= 70) {
+      strength = 'Média';
+      color = 'var(--warning-color)';
+    } else {
+      strength = 'Forte';
+      color = 'var(--success-color)';
+    }
+    
+    strengthMeter.style.backgroundColor = color;
+    strengthText.textContent = `Força da senha: ${strength}`;
+    strengthText.style.color = color;
+  }
+
+  // Gerar uma senha inicial ao carregar a página
+  generateBtn.click();
+});
